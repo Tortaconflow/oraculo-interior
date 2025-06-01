@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viaje Filosófico Interactivo con IA ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-fondo-cosmos: #0B0910; 
+            --color-texto-neutro: #C8C3D7;
+            --color-texto-enfasis: #FFFFFF;
+            --color-iluminacion: #FDE047; 
+            --color-iluminacion-sombra: rgba(253, 224, 71, 0.5);
+            --color-gnosis-primario: #E0D8FF;
+            --color-gnosis-secundario: #B5A8E0;
+            --color-espejo-primario: #000000;
+            --color-espejo-secundario: #4A4A4A; 
+            --color-puente-primario: #B9770E; 
+            --color-puente-secundario: #A1C181; 
+            --color-error-fondo: #5A0A0A;
+            --color-error-borde: #E57373;
+            --font-narrativa: 'Cormorant Garamond', serif;
+            --font-interfaz: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--color-fondo-cosmos);
+            color: var(--color-texto-neutro);
+            font-family: var(--font-interfaz);
+            overflow-x: hidden;
+            transition: background-color 0.8s ease-in-out;
+        }
+
+        .font-narrativa { font-family: var(--font-narrativa); }
+        .font-interfaz { font-family: var(--font-interfaz); }
+
+        .etapa-viaje {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1.5rem;
+            box-sizing: border-box;
+            opacity: 0;
+            transform: translateY(35px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+            position: absolute; 
+            width: 100%;
+            top: 0;
+            left: 0;
+            visibility: hidden; 
+        }
+
+        .etapa-viaje.activa {
+            opacity: 1;
+            transform: translateY(0);
+            position: relative;
+            visibility: visible;
+        }
+        
+        @keyframes pulseUmbral {
+            0% { box-shadow: 0 0 12px 0 var(--color-iluminacion-sombra); transform: scale(1); }
+            50% { box-shadow: 0 0 30px 10px var(--color-iluminacion-sombra); transform: scale(1.03); }
+            100% { box-shadow: 0 0 12px 0 var(--color-iluminacion-sombra); transform: scale(1); }
+        }
+
+        .btn-accion {
+            background-color: transparent;
+            border: 2px solid var(--color-iluminacion);
+            color: var(--color-iluminacion);
+            padding: 0.9rem 1.8rem; 
+            font-family: var(--font-interfaz);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.3px; 
+            border-radius: 12px; 
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 12px 0 var(--color-iluminacion-sombra);
+        }
+        #btnCruzarUmbral {
+            animation: pulseUmbral 3s infinite ease-in-out;
+        }
+
+        .btn-accion:hover, .btn-accion:focus {
+            background-color: var(--color-iluminacion);
+            color: var(--color-fondo-cosmos);
+            transform: scale(1.08); 
+            box-shadow: 0 0 35px 5px var(--color-iluminacion-sombra); 
+            outline: none; 
+        }
+         .btn-accion:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            animation: none; /* Detener animación de pulso si está deshabilitado */
+            box-shadow: 0 0 8px 0 rgba(var(--color-iluminacion-sombra), 0.5);
+        }
+
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23n)" opacity="0.025"/></svg>');
+            z-index: -1;
+            pointer-events: none;
+            animation: subtleNoise 20s infinite alternate;
+        }
+        @keyframes subtleNoise {
+            0% { opacity: 0.025; }
+            100% { opacity: 0.035; }
+        }
+
+        .input-textual {
+            background-color: rgba(255, 255, 255, 0.04); 
+            border: 1px solid var(--color-texto-neutro);
+            color: var(--color-texto-enfasis);
+            padding: 0.9rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 580px; 
+            font-family: var(--font-interfaz);
+            font-size: 1.05rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .input-textual:focus {
+            outline: none;
+            border-color: var(--color-iluminacion);
+            box-shadow: 0 0 15px 0 var(--color-iluminacion-sombra);
+        }
+        .input-textual::placeholder {
+            color: var(--color-texto-neutro);
+            opacity: 0.65; 
+        }
+
+        @keyframes borderPulse {
+            0% { border-color: var(--color-gnosis-secundario); box-shadow: 0 0 8px rgba(var(--color-gnosis-secundario-rgb), 0.3); } /* Necesitaría color en RGB para rgba */
+            50% { border-color: var(--color-iluminacion); box-shadow: 0 0 15px var(--color-iluminacion-sombra); }
+            100% { border-color: var(--color-gnosis-secundario); box-shadow: 0 0 8px rgba(var(--color-gnosis-secundario-rgb), 0.3); }
+        }
+        /* Definir colores RGB para animación de borde si es necesario, o simplificar */
+        /* Ejemplo: --color-gnosis-secundario-rgb: 181, 168, 224; */
+
+        .ai-text-container {
+            border: 1px solid var(--color-gnosis-secundario);
+            padding: 2rem; 
+            border-radius: 12px;
+            background-color: rgba(10, 10, 20, 0.3); 
+            min-height: 130px; 
+            max-width: 680px; 
+            width: 100%;
+            margin-top: 2.2rem; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        .ai-text-container.loading-border {
+            /* animation: borderPulse 1.5s infinite; */ /* Simplificado para evitar dependencia RGB no definida */
+             border-color: var(--color-iluminacion); /* Borde estático mientras carga */
+        }
+
+        #espejo-obsidiana .ai-text-container {
+            border-color: var(--color-espejo-secundario);
+            background: linear-gradient(145deg, rgba(10,10,20,0.5) 0%, rgba(0,0,0,0.7) 100%);
+        }
+        #espejo-obsidiana .ai-text-container.loading-border {
+            border-color: var(--color-iluminacion);
+        }
+
+        .ai-text-container::before { 
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+            transition: left 0.8s ease-in-out;
+        }
+        .ai-text-container.shine::before {
+            left: 150%;
+        }
+
+        .ai-text {
+            font-family: var(--font-narrativa);
+            font-size: 1.35rem; 
+            line-height: 1.8;
+            color: var(--color-texto-enfasis);
+            white-space: pre-wrap;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInText 0.8s 0.3s forwards ease-out;
+        }
+
+        @keyframes fadeInText {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loader {
+            border: 5px solid var(--color-texto-neutro); 
+            border-top: 5px solid var(--color-iluminacion);
+            border-radius: 50%;
+            width: 50px; 
+            height: 50px;
+            animation: spin 1.2s linear infinite;
+            margin: 30px auto; 
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal-error-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-error-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-error-content {
+            background-color: var(--color-error-fondo);
+            padding: 2.2rem;
+            border-radius: 12px;
+            border: 1px solid var(--color-error-borde);
+            color: var(--color-texto-enfasis);
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+        }
+        .modal-error-content p {
+            margin-bottom: 1.8rem;
+            font-size: 1.15rem;
+        }
+        .accion-btn {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--color-puente-secundario);
+            color: var(--color-texto-neutro);
+            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+        }
+        .accion-btn:hover {
+            /* background-color: rgba(var(--color-puente-secundario-rgb), 0.2); */ /* Simplificado */
+            background-color: rgba(161, 193, 129, 0.2); /* Usando el valor hexadecimal de --color-puente-secundario */
+            border-color: var(--color-puente-primario);
+            color: var(--color-texto-enfasis);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .accion-btn.selected {
+            background-color: var(--color-puente-primario);
+            border-color: var(--color-iluminacion);
+            color: var(--color-fondo-cosmos);
+            font-weight: bold;
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 6px 20px rgba(var(--color-puente-primario-rgb, 185, 119, 14), 0.4); /* Necesitaría color en RGB */
+        }
+
+    </style>
+</head>
+<body class="text-center">
+
+    <section id="umbral" class="etapa-viaje activa">
+        <div class="max-w-2xl mx-auto">
+            <h1 class="font-narrativa text-5xl sm:text-6xl md:text-7xl font-bold mb-8" style="color: var(--color-texto-enfasis); text-shadow: 0 0 15px rgba(253, 224, 71, 0.3);">
+                El Oráculo Interior
+            </h1>
+            <p class="font-narrativa text-2xl sm:text-3xl mb-12 leading-relaxed" style="color: var(--color-texto-neutro);">
+                Un viaje aguarda en tus profundidades.
+                <br class="hidden sm:block">
+                La sabiduría que buscas, ya reside en ti.
+            </p>
+            <p class="font-narrativa text-3xl sm:text-4xl font-bold mb-16" style="color: var(--color-iluminacion);">
+                ¿Te atreves a despertar?
+            </p>
+            <button id="btnCruzarUmbral" class="btn-accion text-xl" aria-label="Cruzar el Umbral e iniciar el viaje filosófico">
+                Cruzar el Umbral
+            </button>
+        </div>
+    </section>
+
+    <section id="gnosis-inversa" class="etapa-viaje">
+        <div class="max-w-2xl mx-auto w-full">
+            <h2 class="font-narrativa text-4xl sm:text-5xl font-bold mb-10" style="color: var(--color-gnosis-primario);">Gnosis Inversa: Rompe tus Límites</h2>
+            <p class="font-interfaz text-xl mb-8" style="color: var(--color-texto-neutro);">
+                Escribe una creencia que te defina o limite.
+                Juntos, exploraremos más allá de sus bordes.
+            </p>
+            <textarea id="creenciaUsuario" class="input-textual mb-8 h-36 text-lg" placeholder="Ej: 'Siempre debo complacer a los demás', 'No soy capaz de...', 'El mundo es un lugar hostil'..." aria-label="Ingresa tu creencia"></textarea>
+            <button id="btnFracturarIdea" class="btn-accion text-lg" aria-label="Enviar creencia para explorar">✨ Explorar esta Idea</button>
+            
+            <div id="respuestaIaGnosis" class="ai-text-container mt-10" style="display: none;" role="alert" aria-live="polite">
+                 <div id="loaderGnosis" class="loader" style="display: none;"></div>
+                <p id="textoIaGnosis" class="ai-text"></p>
+            </div>
+            <button id="btnAvanzarDesdeGnosis" class="btn-accion mt-10" style="display: none;" aria-label="Continuar al Espejo de Obsidiana">Continuar al Espejo</button>
+        </div>
+    </section>
+
+    <section id="espejo-obsidiana" class="etapa-viaje">
+        <div class="max-w-2xl mx-auto w-full">
+            <h2 class="font-narrativa text-4xl sm:text-5xl font-bold mb-8" style="color: var(--color-texto-enfasis);">Espejo de Obsidiana: Tu Reflejo Interior</h2>
+            <p class="font-interfaz text-xl mb-6" style="color: var(--color-texto-neutro);">
+                El Oráculo te ha escuchado. Ahora, contempla tu reflejo en la quietud.
+                ¿Qué susurros emergen desde tu interior?
+            </p>
+            <p class="font-interfaz text-lg mb-8 italic" style="color: var(--color-texto-neutro); opacity: 0.85;">
+                Este es un espacio seguro. Sin juicios, solo tu verdad.
+            </p>
+            <div id="respuestaIaEspejo" class="ai-text-container" role="alert" aria-live="polite">
+                <div id="loaderEspejo" class="loader" style="display: none;"></div>
+                <p id="textoIaEspejo" class="ai-text"></p>
+            </div>
+            <textarea id="respuestaUsuarioEspejo" class="input-textual mt-8 mb-8 h-36 text-lg" placeholder="Escribe libremente tus pensamientos, emociones, preguntas..." aria-label="Responde al Oráculo"></textarea>
+            <button id="btnConsultarOraculo" class="btn-accion text-lg" aria-label="Enviar reflexión al Oráculo">✨ Ofrecer al Espejo</button>
+            <button id="btnAvanzarDesdeEspejo" class="btn-accion mt-10" style="display: none;" aria-label="Continuar al Puente a la Realidad">Forjar mi Puente a la Realidad</button>
+        </div>
+    </section>
+
+    <section id="puente-realidad" class="etapa-viaje">
+        <div class="max-w-2xl mx-auto w-full">
+            <h2 class="font-narrativa text-4xl sm:text-5xl font-bold mb-10" style="color: var(--color-puente-primario);">Puente a la Realidad: Tu Próximo Paso</h2>
+            <p class="font-interfaz text-xl mb-8" style="color: var(--color-texto-neutro);">
+                La introspección florece en la acción. Elige un pequeño gesto para anclar tu descubrimiento en tu día a día.
+            </p>
+             <button id="btnGenerarAcciones" class="btn-accion text-lg mb-8" aria-label="Generar acciones con IA">✨ Inspirar Acciones</button>
+            <div id="accionesPropuestas" class="space-y-5 mb-10">
+                </div>
+            <div id="loaderPuente" class="loader" style="display: none;"></div>
+            <p id="mensajeFinalPuente" class="ai-text mt-8" style="display:none;" role="alert" aria-live="polite"></p>
+            <button id="btnReiniciarViaje" class="btn-accion mt-10 text-lg" style="display:none;" aria-label="Comenzar un nuevo viaje filosófico">Iniciar un Nuevo Viaje</button>
+        </div>
+    </section>
+
+    <div id="modalError" class="modal-error-overlay">
+        <div class="modal-error-content">
+            <p id="modalErrorMessage"></p>
+            <button id="btnCerrarModalError" class="btn-accion">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        // Manejo de errores global
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('Error Global Capturado:', { msg, url, lineNo, columnNo, errorObj: error });
+            if (typeof mostrarError === 'function') {
+                mostrarError(`Error: ${msg} (Línea: ${lineNo}). Revisa la consola.`);
+            }
+            return false;
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const getElement = (id) => {
+                const el = document.getElementById(id);
+                if (!el) console.warn(`Elemento con ID '${id}' no encontrado.`);
+                return el;
+            };
+
+            const etapas = {
+                umbral: getElement('umbral'),
+                gnosisInversa: getElement('gnosis-inversa'),
+                espejoObsidiana: getElement('espejo-obsidiana'),
+                puenteRealidad: getElement('puente-realidad')
+            };
+
+            const botones = {
+                cruzarUmbral: getElement('btnCruzarUmbral'),
+                fracturarIdea: getElement('btnFracturarIdea'),
+                avanzarDesdeGnosis: getElement('btnAvanzarDesdeGnosis'),
+                consultarOraculo: getElement('btnConsultarOraculo'),
+                avanzarDesdeEspejo: getElement('btnAvanzarDesdeEspejo'),
+                generarAcciones: getElement('btnGenerarAcciones'), // Nuevo botón
+                reiniciarViaje: getElement('btnReiniciarViaje'),
+                cerrarModalError: getElement('btnCerrarModalError')
+            };
+
+            const inputs = {
+                creenciaUsuario: getElement('creenciaUsuario'),
+                respuestaUsuarioEspejo: getElement('respuestaUsuarioEspejo')
+            };
+
+            const displaysIa = {
+                contenedorGnosis: getElement('respuestaIaGnosis'),
+                textoGnosis: getElement('textoIaGnosis'),
+                loaderGnosis: getElement('loaderGnosis'),
+                contenedorEspejo: getElement('respuestaIaEspejo'),
+                textoEspejo: getElement('textoIaEspejo'),
+                loaderEspejo: getElement('loaderEspejo'),
+                accionesPuente: getElement('accionesPropuestas'),
+                loaderPuente: getElement('loaderPuente'),
+                mensajeFinalPuente: getElement('mensajeFinalPuente')
+            };
+
+            const modalError = {
+                overlay: getElement('modalError'),
+                message: getElement('modalErrorMessage')
+            };
+            
+            let estadoActual = 'umbral';
+            let historialReflexion = []; // Aquí se guardará el contexto del diálogo
+
+            function mostrarError(mensaje) {
+                if (modalError.message) modalError.message.textContent = mensaje;
+                if (modalError.overlay) modalError.overlay.classList.add('visible');
+            }
+
+            if (botones.cerrarModalError && modalError.overlay) {
+                botones.cerrarModalError.addEventListener('click', () => {
+                    modalError.overlay.classList.remove('visible');
+                });
+            }
+            
+            function cambiarEtapa(nuevaEtapaId) {
+                if (etapas[estadoActual]) {
+                    etapas[estadoActual].classList.remove('activa');
+                }
+                setTimeout(() => {
+                    if (etapas[nuevaEtapaId]) {
+                        etapas[nuevaEtapaId].classList.add('activa');
+                        estadoActual = nuevaEtapaId;
+                        actualizarColorFondo(nuevaEtapaId);
+                        const primerInput = etapas[nuevaEtapaId].querySelector('textarea, input:not([type="hidden"])');
+                        if (primerInput) {
+                            setTimeout(() => primerInput.focus(), 100);
+                        }
+                        // Si llegamos a la etapa del espejo, precargar un mensaje inicial
+                        if (nuevaEtapaId === 'espejoObsidiana' && displaysIa.textoEspejo) {
+                             displaysIa.textoEspejo.style.opacity = '0'; // Para animación
+                             displaysIa.textoEspejo.textContent = "El Espejo te recibe. ¿Qué deseas compartir con tu reflejo más íntimo?";
+                             // Forzar reflow para la animación de opacidad
+                             void displaysIa.textoEspejo.offsetWidth; 
+                             displaysIa.textoEspejo.style.opacity = '1';
+                        }
+                         // Ocultar el botón de generar acciones si no estamos en la etapa del puente
+                        if (botones.generarAcciones) {
+                            botones.generarAcciones.style.display = (nuevaEtapaId === 'puenteRealidad') ? 'inline-block' : 'none';
+                        }
+
+
+                    } else {
+                        console.error(`Etapa '${nuevaEtapaId}' no encontrada.`);
+                        mostrarError(`Error interno: No se pudo cambiar a la etapa '${nuevaEtapaId}'.`);
+                    }
+                }, 150); 
+            }
+            
+            function actualizarColorFondo(etapa) {
+                let colorFondoTarget = 'var(--color-fondo-cosmos)';
+                if (etapa === 'espejoObsidiana') colorFondoTarget = 'var(--color-espejo-primario)';
+                else if (etapa === 'puenteRealidad') colorFondoTarget = '#170F20';
+                
+                document.body.style.backgroundColor = colorFondoTarget;
+            }
+
+            // --- Llamada a la API de Gemini ---
+            async function llamarGeminiAPI(prompt, etapa) {
+                const aiContainer = etapa === 'gnosis' ? displaysIa.contenedorGnosis :
+                                   etapa === 'espejo' ? displaysIa.contenedorEspejo :
+                                   null;
+                const loader = etapa === 'gnosis' ? displaysIa.loaderGnosis :
+                               etapa === 'espejo' ? displaysIa.loaderEspejo :
+                               displaysIa.loaderPuente;
+                const textoIaEl = etapa === 'gnosis' ? displaysIa.textoGnosis :
+                                  etapa === 'espejo' ? displaysIa.textoEspejo :
+                                  null;
+
+                if (loader) loader.style.display = 'block';
+                if (textoIaEl) textoIaEl.textContent = ''; // Limpiar texto anterior para que la animación de opacidad funcione
+                if (aiContainer) {
+                    aiContainer.classList.add('loading-border');
+                    aiContainer.classList.remove('shine');
+                }
+                // Deshabilitar botones de acción de IA mientras se carga
+                if (botones.fracturarIdea) botones.fracturarIdea.disabled = true;
+                if (botones.consultarOraculo) botones.consultarOraculo.disabled = true;
+                if (botones.generarAcciones) botones.generarAcciones.disabled = true;
+
+
+                // Construcción del historial para Gemini
+                let chatHistoryForAPI = historialReflexion.map(item => {
+                    if (item.usuario) return { role: "user", parts: [{ text: item.usuario }] };
+                    if (item.ia) return { role: "model", parts: [{ text: item.ia }] };
+                    return null; // En caso de algún formato inesperado
+                }).filter(item => item !== null); // Filtrar nulos
+
+                // Añadir el prompt actual del usuario
+                chatHistoryForAPI.push({ role: "user", parts: [{ text: prompt }] });
+                
+                const payload = {
+                    contents: chatHistoryForAPI,
+                };
+
+                // Configuración específica para la etapa 'puente' (JSON)
+                if (etapa === 'puente') {
+                    payload.generationConfig = {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    "id": { "type": "STRING" },
+                                    "text": { "type": "STRING" }
+                                },
+                                required: ["id", "text"]
+                            }
+                        }
+                    };
+                }
+                
+                const apiKey = ""; // Dejar vacío, Canvas lo gestionará
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    console.log("Payload para Gemini:", JSON.stringify(payload, null, 2));
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.text();
+                        console.error("Error de API:", response.status, errorBody);
+                        throw new Error(`El Oráculo ha encontrado un obstáculo (${response.status}). Intenta de nuevo o revisa la consola.`);
+                    }
+
+                    const data = await response.json();
+                    console.log("Respuesta de Gemini:", data);
+
+                    if (data.candidates && data.candidates.length > 0 &&
+                        data.candidates[0].content && data.candidates[0].content.parts &&
+                        data.candidates[0].content.parts.length > 0) {
+                        
+                        const resultText = data.candidates[0].content.parts[0].text;
+                        // Guardar la respuesta de la IA en el historial
+                        historialReflexion.push({ ia: resultText }); 
+                        
+                        if (etapa === 'puente') {
+                            try {
+                                return JSON.parse(resultText);
+                            } catch (e) {
+                                console.error("Error parseando JSON de acciones:", e, "\nTexto recibido:", resultText);
+                                throw new Error("El Oráculo ofreció sugerencias en un formato inesperado. Por favor, intenta de nuevo.");
+                            }
+                        }
+                        return resultText;
+                    } else if (data.promptFeedback && data.promptFeedback.blockReason) {
+                        console.error("Prompt bloqueado:", data.promptFeedback.blockReason, data.promptFeedback.safetyRatings);
+                        throw new Error(`El Oráculo considera que la senda actual es delicada (${data.promptFeedback.blockReason}). Intenta reformular tu pensamiento.`);
+                    } 
+                    else {
+                        console.error("Respuesta inesperada de la API:", data);
+                        throw new Error("El Oráculo ha respondido de forma enigmática. Intenta de nuevo.");
+                    }
+                } catch (error) {
+                    console.error(`Error en llamarGeminiAPI (etapa ${etapa}):`, error);
+                    mostrarError(error.message || "El Oráculo necesita un momento de silencio. Intenta de nuevo más tarde.");
+                    // Devolver un valor por defecto que no rompa el flujo
+                    return etapa === 'puente' ? [] : "El Oráculo parece estar meditando... Por favor, inténtalo de nuevo.";
+                } finally {
+                    if (loader) loader.style.display = 'none';
+                    if (aiContainer) {
+                        aiContainer.classList.remove('loading-border');
+                        setTimeout(() => aiContainer.classList.add('shine'), 50);
+                    }
+                    // Reactivar botones
+                    if (botones.fracturarIdea) botones.fracturarIdea.disabled = false;
+                    if (botones.consultarOraculo) botones.consultarOraculo.disabled = false;
+                    if (botones.generarAcciones) botones.generarAcciones.disabled = false;
+                }
+            }
+            
+            // --- Manejadores de Eventos ---
+            if (botones.cruzarUmbral) botones.cruzarUmbral.addEventListener('click', () => {
+                cambiarEtapa('gnosisInversa');
+            });
+
+            if (botones.fracturarIdea && inputs.creenciaUsuario && displaysIa.contenedorGnosis && displaysIa.textoGnosis && botones.avanzarDesdeGnosis) {
+                botones.fracturarIdea.addEventListener('click', async () => {
+                    const creencia = inputs.creenciaUsuario.value.trim();
+                    if (!creencia) {
+                        mostrarError("Describe una creencia o idea para comenzar la exploración.");
+                        return;
+                    }
+                    // No añadir al historial aquí, se hace antes de la llamada a la API
+                    // historialReflexion.push({ etapa: 'gnosis-inicio', usuario: creencia }); 
+                    displaysIa.contenedorGnosis.style.display = 'block';
+                    displaysIa.textoGnosis.style.opacity = '0';
+
+                    const promptGnosis = `Actúa como un Oráculo Guía con un tono poético, claro y alentador. El usuario ha compartido la siguiente creencia o "verdad" personal: "${creencia}". Tu objetivo es ayudarle a ver esta creencia desde nuevas perspectivas, formulando una o dos preguntas abiertas y amables que inviten a la introspección. No des respuestas directas, solo guía la reflexión. Considera el historial de diálogo previo si existe.`;
+                    const respuesta = await llamarGeminiAPI(promptGnosis, 'gnosis');
+                    
+                    displaysIa.textoGnosis.textContent = respuesta;
+                    // El historial de la respuesta de IA ya se añade dentro de llamarGeminiAPI
+                    botones.avanzarDesdeGnosis.style.display = 'inline-block';
+                });
+            }
+
+            if (botones.avanzarDesdeGnosis) botones.avanzarDesdeGnosis.addEventListener('click', () => {
+                cambiarEtapa('espejoObsidiana');
+            });
+
+            if (botones.consultarOraculo && inputs.respuestaUsuarioEspejo && displaysIa.textoEspejo && botones.avanzarDesdeEspejo) {
+                botones.consultarOraculo.addEventListener('click', async () => {
+                    const reflexionEspejo = inputs.respuestaUsuarioEspejo.value.trim();
+                    if (!reflexionEspejo) {
+                        mostrarError("Comparte tu sentir con el Espejo para continuar la danza.");
+                        return;
+                    }
+                    displaysIa.textoEspejo.style.opacity = '0';
+
+                    const promptEspejo = `Actúa como el "Espejo Interior", un oráculo de tono sereno, aceptador y profundo. El usuario ha compartido la siguiente reflexión: "${reflexionEspejo}". Ofrece una observación o pregunta gentil que invite a una mayor auto-comprensión y profundización. No emitas juicios, solo refleja y guía. Considera el historial de diálogo previo.`;
+                    const respuesta = await llamarGeminiAPI(promptEspejo, 'espejo');
+
+                    displaysIa.textoEspejo.textContent = respuesta;
+                    if(inputs.respuestaUsuarioEspejo) inputs.respuestaUsuarioEspejo.value = ''; 
+                    botones.avanzarDesdeEspejo.style.display = 'inline-block';
+                });
+            }
+            
+            if (botones.avanzarDesdeEspejo) {
+                 botones.avanzarDesdeEspejo.addEventListener('click', () => {
+                    cambiarEtapa('puenteRealidad');
+                    // Limpiar acciones anteriores y ocultar mensaje final por si se vuelve a esta etapa
+                    if(displaysIa.accionesPuente) displaysIa.accionesPuente.innerHTML = '';
+                    if(displaysIa.mensajeFinalPuente) {
+                        displaysIa.mensajeFinalPuente.textContent = '';
+                        displaysIa.mensajeFinalPuente.style.display = 'none';
+                    }
+                    if(botones.reiniciarViaje) botones.reiniciarViaje.style.display = 'none';
+                });
+            }
+
+            if (botones.generarAcciones && displaysIa.accionesPuente) {
+                botones.generarAcciones.addEventListener('click', async () => {
+                    displaysIa.accionesPuente.innerHTML = ''; // Limpiar acciones previas
+                    displaysIa.mensajeFinalPuente.style.display = 'none'; // Ocultar mensaje final previo
+                    botones.reiniciarViaje.style.display = 'none'; // Ocultar botón de reinicio
+
+                    const promptPuente = `Actúa como "El Guía Práctico del Alma", con un tono inspirador y concreto. Basándote en el historial de diálogo completo del usuario, sugiere exactamente 3 "micro-pasos" o "gestos simbólicos" que sean realizables a corto plazo y estén conectados temáticamente con su viaje introspectivo. Formato de respuesta: estrictamente un array JSON de objetos, donde cada objeto tiene las propiedades "id" (string, ej: "accion1") y "text" (string, la descripción de la acción).`;
+                    const acciones = await llamarGeminiAPI(promptPuente, 'puente');
+                    
+                    if (Array.isArray(acciones) && acciones.length > 0) {
+                        acciones.forEach((accion, index) => {
+                            const btnAccionEl = document.createElement('button');
+                            btnAccionEl.className = 'btn-accion accion-btn w-full mb-3 text-left p-4 text-sm sm:text-base';
+                            btnAccionEl.textContent = accion.text;
+                            // Asegurar que el ID sea único si Gemini no lo proporciona o es genérico
+                            btnAccionEl.dataset.actionId = accion.id || `accion-${Date.now()}-${index}`; 
+                            btnAccionEl.setAttribute('aria-label', `Seleccionar acción: ${accion.text}`);
+                            btnAccionEl.addEventListener('click', (e) => {
+                                displaysIa.accionesPuente.querySelectorAll('button.selected').forEach(b => b.classList.remove('selected'));
+                                e.currentTarget.classList.add('selected');
+                                seleccionarAccion(e.currentTarget.dataset.actionId, accion.text);
+                            });
+                            displaysIa.accionesPuente.appendChild(btnAccionEl);
+                        });
+                    } else if (Array.isArray(acciones) && acciones.length === 0 && displaysIa.loaderPuente.style.display === 'none') {
+                         displaysIa.accionesPuente.innerHTML = `<p class='text-yellow-200 italic text-lg'>El Guía considera tus pasos. A veces, la quietud es la acción más sabia.</p>`;
+                    } else if (!Array.isArray(acciones) && displaysIa.loaderPuente.style.display === 'none') {
+                         displaysIa.accionesPuente.innerHTML = `<p class='text-red-300 text-lg'>No se pudieron sugerir pasos en este momento. ${typeof acciones === 'string' ? acciones : ''}</p>`;
+                    }
+                });
+            }
+
+
+            function seleccionarAccion(id, texto) {
+                // No añadir al historial principal aquí, ya que es una elección, no un diálogo con IA
+                // historialReflexion.push({ etapa: 'puente-seleccion', accion: { id, texto } });
+                console.log("Acción seleccionada:", { id, texto });
+                if(displaysIa.mensajeFinalPuente) {
+                    displaysIa.mensajeFinalPuente.style.opacity = '0';
+                    displaysIa.mensajeFinalPuente.textContent = `Has elegido el gesto: "${texto}". Que este pequeño acto te ancle y te inspire. El viaje continúa con cada paso consciente.`;
+                    displaysIa.mensajeFinalPuente.style.display = 'block';
+                }
+                if(botones.reiniciarViaje) botones.reiniciarViaje.style.display = 'inline-block';
+            }
+            
+            if (botones.reiniciarViaje) botones.reiniciarViaje.addEventListener('click', () => {
+                historialReflexion = []; // Limpiar historial para el nuevo viaje
+                if(inputs.creenciaUsuario) inputs.creenciaUsuario.value = '';
+                if(inputs.respuestaUsuarioEspejo) inputs.respuestaUsuarioEspejo.value = '';
+                
+                [displaysIa.textoGnosis, displaysIa.textoEspejo, displaysIa.mensajeFinalPuente].forEach(el => {
+                    if(el) { el.textContent = ''; el.style.opacity = '0';}
+                });
+                if(displaysIa.accionesPuente) displaysIa.accionesPuente.innerHTML = '';
+                if(displaysIa.mensajeFinalPuente) displaysIa.mensajeFinalPuente.style.display = 'none';
+                
+                [botones.avanzarDesdeGnosis, botones.avanzarDesdeEspejo, botones.reiniciarViaje, botones.generarAcciones].forEach(btn => {
+                    if(btn) btn.style.display = 'none';
+                });
+                if(displaysIa.contenedorGnosis) displaysIa.contenedorGnosis.style.display = 'none';
+
+                cambiarEtapa('umbral');
+            });
+
+            // Inicialización
+            if (etapas.umbral && etapas.umbral.classList.contains('activa')) {
+                 actualizarColorFondo('umbral');
+                 if (botones.generarAcciones) botones.generarAcciones.style.display = 'none';
+            } else if (Object.values(etapas).some(el => el && el.classList.contains('activa'))) {
+                // No hacer nada, asumir estado correcto
+            } else if (etapas.umbral) { 
+                etapas.umbral.classList.add('activa');
+                actualizarColorFondo('umbral');
+                if (botones.generarAcciones) botones.generarAcciones.style.display = 'none';
+            }
+
+        }); 
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,15 @@
+# Configuración de Netlify para el proyecto Oráculo Interior + Sabueso Digital AI
+
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  # Las funciones usan el runtime Node 18+ (fetch nativo).
+
+# Redirección amigable: /sabueso → sabueso.html
+[[redirects]]
+  from = "/sabueso"
+  to = "/sabueso.html"
+  status = 200

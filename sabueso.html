@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sabueso Digital AI — Prospección Comercial Autónoma 🐾</title>
+  <meta name="description" content="Agente autónomo de prospección comercial: descubre negocios locales, audita sus sitios web, califica oportunidades y genera mensajes de prospección personalizados." />
+  <link rel="stylesheet" href="css/sabueso.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="logo">🐾</div>
+      <h1>Sabueso Digital <span class="grad">AI</span></h1>
+      <p class="sub">Agente autónomo de prospección comercial. Descubre negocios locales, audita su presencia digital, califica la oportunidad y genera mensajes de prospección listos para enviar.</p>
+    </header>
+
+    <!-- Fase 1: Búsqueda -->
+    <section class="panel" aria-labelledby="busqueda-h">
+      <h2 id="busqueda-h" style="margin:0 0 1rem; font-size:1.15rem;">🔍 Descubrimiento de negocios</h2>
+      <form id="form-busqueda">
+        <div class="form-grid">
+          <div>
+            <label for="categoria">Categoría / Nicho</label>
+            <input id="categoria" name="categoria" placeholder="Ej: Dentistas, Hoteles, Restaurantes" required />
+          </div>
+          <div>
+            <label for="ubicacion">Ubicación</label>
+            <input id="ubicacion" name="ubicacion" placeholder="Ej: Oaxaca, Puerto Escondido, Tabasco" required />
+          </div>
+          <div>
+            <label for="maxResultados">Máx. resultados</label>
+            <select id="maxResultados" name="maxResultados">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="15">15</option>
+              <option value="20">20</option>
+            </select>
+          </div>
+          <div>
+            <button type="submit" id="btn-buscar" class="btn-primary">Iniciar prospección</button>
+          </div>
+        </div>
+        <button type="button" id="toggle-adv" class="adv-toggle">⚙️ Claves de API (opcional)</button>
+        <div id="adv-keys" class="adv-keys">
+          <div>
+            <label for="placesApiKey">Google Places API Key</label>
+            <input id="placesApiKey" type="password" placeholder="Necesaria para descubrir negocios reales" autocomplete="off" />
+          </div>
+          <div>
+            <label for="geminiApiKey">Gemini API Key</label>
+            <input id="geminiApiKey" type="password" placeholder="Para mensajes con IA (opcional)" autocomplete="off" />
+          </div>
+          <p class="adv-note">
+            Las claves se guardan sólo en tu navegador (localStorage) y se envían a las funciones serverless del proyecto.
+            En producción, configúralas como variables de entorno <code>GOOGLE_PLACES_API_KEY</code> y <code>GEMINI_API_KEY</code> en Netlify.
+            Sin clave de Gemini, los mensajes se generan con plantilla.
+          </p>
+        </div>
+      </form>
+
+      <div id="progress" class="progress" aria-live="polite">
+        <div class="progress-bar"><div id="progress-fill"></div></div>
+        <div id="progress-label" class="progress-label">Preparando…</div>
+      </div>
+
+      <div id="error" class="errorbox" hidden></div>
+    </section>
+
+    <!-- Resultados -->
+    <section id="resultados" hidden>
+      <div class="stats" id="stats"></div>
+
+      <div class="table-tools">
+        <h2>📋 Prospectos priorizados</h2>
+        <div>
+          <button id="btn-csv" class="btn-csv">⬇️ Descargar CSV</button>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table id="tabla">
+          <thead>
+            <tr>
+              <th data-sort="score">Score ▾</th>
+              <th data-sort="prioridad">Prioridad</th>
+              <th data-sort="nombre">Negocio</th>
+              <th data-sort="categoria">Categoría</th>
+              <th>Contacto</th>
+              <th data-sort="numProblemas">Problemas</th>
+              <th>Detalle</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      <p class="disclaimer">
+        ⚖️ Uso responsable: este agente está diseñado para prospección comercial B2B legítima.
+        Respeta las leyes de protección de datos y anti-spam de tu país (p. ej. LFPDPPP en México, GDPR en la UE)
+        y verifica los datos antes de contactar. La auditoría analiza el HTML servido públicamente de cada sitio.
+      </p>
+      <p>Parte del proyecto <a href="index.html">Oráculo Interior</a> · Sabueso Digital AI</p>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="js/sabueso.js"></script>
+</body>
+</html>
